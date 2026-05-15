@@ -3,78 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS CV Projesi - Kayıt Ekranı</title>
+    <title>AWS CV Projesi - Yeni Kayıt</title>
     <style>
         :root {
             --primary: #8a2be2;
-            --secondary: #4b0082;
+            --accent: #ec4899;
             --bg: #0f172a;
-            --glass: rgba(255, 255, 255, 0.05);
+            --surface: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
             --text: #f8fafc;
+            --muted: #94a3b8;
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --success-color: #4ade80;
+            --error-bg: rgba(239, 68, 68, 0.1);
+            --error-color: #f87171;
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            margin: 0;
-            padding: 0;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             background: linear-gradient(135deg, var(--bg) 0%, #1e1b4b 100%);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             color: var(--text);
+            display: flex;
+            flex-direction: column;
         }
 
-        .container {
-            background: var(--glass);
+        /* ── NAV ── */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .nav-brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(to right, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links { display: flex; gap: 0.5rem; }
+
+        .nav-btn {
+            padding: 0.5rem 1.2rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover { background: var(--surface); color: var(--text); }
+        .nav-btn.active { background: rgba(168, 85, 247, 0.1); color: var(--text); border-color: #a855f7; }
+
+        /* ── PAGE CENTER ── */
+        .page-center {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--surface);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border);
-            padding: 3rem;
+            padding: 2.5rem;
             border-radius: 24px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             transition: transform 0.3s ease;
         }
 
-        .container:hover {
-            transform: translateY(-5px);
-        }
+        .card:hover { transform: translateY(-4px); }
 
         h1 {
-            margin-top: 0;
-            font-size: 2rem;
+            font-size: 1.8rem;
             background: linear-gradient(to right, #a855f7, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-align: center;
+            margin-bottom: 0.4rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--muted);
             margin-bottom: 2rem;
         }
 
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
+        .input-group { margin-bottom: 1.25rem; }
 
         label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: #cbd5e1;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         input {
             width: 100%;
             padding: 0.75rem 1rem;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border);
             border-radius: 12px;
             color: white;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
         }
 
         input:focus {
@@ -84,8 +140,7 @@
         }
 
         input[type="file"] {
-            padding: 0.5rem;
-            background: rgba(255, 255, 255, 0.02);
+            padding: 0.5rem 0.75rem;
             cursor: pointer;
         }
 
@@ -93,176 +148,202 @@
             background: var(--primary);
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.9rem;
             border-radius: 8px;
-            margin-right: 1rem;
+            margin-right: 0.75rem;
             cursor: pointer;
-            transition: background 0.3s ease;
+            font-size: 0.85rem;
+            transition: background 0.2s;
         }
 
-        input[type="file"]::-webkit-file-upload-button:hover {
-            background: var(--secondary);
-        }
+        input[type="file"]::-webkit-file-upload-button:hover { background: #7c22cc; }
 
-        button {
+        .submit-btn {
             width: 100%;
-            padding: 1rem;
-            background: linear-gradient(to right, var(--primary), #ec4899);
+            padding: 0.9rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
             color: white;
             border: none;
             border-radius: 12px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.3s ease, transform 0.1s ease;
-            margin-top: 1rem;
+            transition: opacity 0.25s ease, transform 0.1s ease;
+            margin-top: 0.5rem;
         }
 
-        button:hover {
-            opacity: 0.9;
-        }
+        .submit-btn:hover { opacity: 0.9; }
+        .submit-btn:active { transform: scale(0.98); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        button:active {
-            transform: scale(0.98);
-        }
-
-        #result {
-            margin-top: 1.5rem;
-            padding: 1rem;
+        .result-box {
+            margin-top: 1.25rem;
+            padding: 0.9rem 1rem;
             border-radius: 12px;
-            display: none;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             text-align: center;
+            display: none;
+            line-height: 1.5;
         }
 
-        .success {
-            background: rgba(34, 197, 94, 0.1);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.2);
-        }
+        .result-box.success { background: var(--success-bg); color: var(--success-color); border: 1px solid rgba(34,197,94,0.2); }
+        .result-box.error   { background: var(--error-bg);   color: var(--error-color);   border: 1px solid rgba(239,68,68,0.2); }
 
-        .error {
-            background: rgba(239, 68, 68, 0.1);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        #profile-img-container {
+        .photo-preview {
             margin-top: 1rem;
             text-align: center;
             display: none;
         }
 
-        #profile-img {
-            width: 100px;
-            height: 100px;
+        .photo-preview p {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .photo-preview img {
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid #a855f7;
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
-            margin-top: 1rem;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
         }
+
+        .goto-users {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.82rem;
+            color: #a855f7;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .goto-users:hover { opacity: 0.75; }
+
+        /* ── TECH BADGES ── */
+        .tech-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .tech-badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid;
+            letter-spacing: 0.3px;
+        }
+
+        .tb-s3     { background: rgba(168,85,247,0.1);  color:#c084fc; border-color: rgba(168,85,247,0.3); }
+        .tb-sqs    { background: rgba(236,72,153,0.1);  color:#f472b6; border-color: rgba(236,72,153,0.3); }
+        .tb-rds    { background: rgba(250,204,21,0.1);  color:#fbbf24; border-color: rgba(250,204,21,0.3); }
+        .tb-ec2    { background: rgba(74,222,128,0.1);  color:#4ade80; border-color: rgba(74,222,128,0.3); }
     </style>
 </head>
 <body>
 
-<nav style="display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:rgba(0,0,0,0.3);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.1);position:sticky;top:0;z-index:100">
-    <div style="font-weight:700;background:linear-gradient(to right,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent">☁️ AWS CV Project</div>
-    <div style="display:flex;gap:0.5rem">
-        <a href="/" style="padding:0.5rem 1.2rem;border-radius:10px;border:1px solid #a855f7;background:rgba(168,85,247,0.1);color:#f8fafc;text-decoration:none;font-size:0.875rem">+ Yeni Kayıt</a>
-        <a href="/users.html" style="padding:0.5rem 1.2rem;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#94a3b8;text-decoration:none;font-size:0.875rem">👥 Kullanıcılar</a>
+<nav>
+    <div class="nav-brand">☁️ AWS CV Project</div>
+    <div class="nav-links">
+        <a href="/" class="nav-btn active">+ Yeni Kayıt</a>
+        <a href="/users.html" class="nav-btn">👥 Kullanıcılar</a>
     </div>
 </nav>
 
-<div style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 61px);padding:2rem">
+<div class="page-center">
+    <div class="card">
         <h1>Yeni Kullanıcı Kaydı</h1>
+        <p class="subtitle">Spring Boot + AWS S3 · SQS · RDS · EC2</p>
+
+        <div class="tech-badges">
+            <span class="tech-badge tb-s3">🪣 S3 Presigned</span>
+            <span class="tech-badge tb-sqs">📨 SQS Async</span>
+            <span class="tech-badge tb-rds">🗄 RDS PostgreSQL</span>
+            <span class="tech-badge tb-ec2">⚡ EC2</span>
+        </div>
+
         <form id="registerForm">
             <div class="input-group">
                 <label for="fullName">Ad Soyad</label>
                 <input type="text" id="fullName" name="fullName" required placeholder="Örn: Ahmet Yılmaz">
             </div>
-            
             <div class="input-group">
                 <label for="email">E-posta Adresi</label>
                 <input type="email" id="email" name="email" required placeholder="Örn: ahmet@example.com">
             </div>
-
             <div class="input-group">
                 <label for="profilePicture">Profil Resmi</label>
                 <input type="file" id="profilePicture" name="profilePicture" accept="image/*" required>
             </div>
-
-            <button type="submit" id="submitBtn">Kayıt Ol</button>
+            <button type="submit" class="submit-btn" id="submitBtn">Kayıt Ol</button>
         </form>
 
-        <div id="result"></div>
-        
-        <div id="profile-img-container">
-            <p style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px;">AWS S3 Presigned URL ile getirilen resim:</p>
-            <img id="profile-img" src="" alt="Profil Resmi">
-        </div>
-    </div>
+        <div class="result-box" id="result"></div>
 
+        <div class="photo-preview" id="photoPreview">
+            <p>🔒 AWS S3 Presigned URL ile getirilen resim:</p>
+            <img id="profileImg" src="" alt="Profil Resmi">
+        </div>
+
+        <a href="/users.html" class="goto-users" id="gotoUsers" style="display:none">
+            👥 Tüm kullanıcıları görüntüle →
+        </a>
+    </div>
 </div>
 
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const resultDiv = document.getElementById('result');
-            const imgContainer = document.getElementById('profile-img-container');
-            const profileImg = document.getElementById('profile-img');
-            
-            btn.innerText = 'AWS\'e Yükleniyor...';
-            btn.style.opacity = '0.7';
-            btn.disabled = true;
-            resultDiv.style.display = 'none';
-            imgContainer.style.display = 'none';
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const resultBox = document.getElementById('result');
+        const photoPreview = document.getElementById('photoPreview');
+        const gotoUsers = document.getElementById('gotoUsers');
 
-            const formData = new FormData(e.target);
+        btn.textContent = "AWS'e Yükleniyor...";
+        btn.disabled = true;
+        resultBox.style.display = 'none';
+        photoPreview.style.display = 'none';
+        gotoUsers.style.display = 'none';
 
-            try {
-                // 1. Kayıt İşlemi (POST)
-                const response = await fetch('/api/users/register', {
-                    method: 'POST',
-                    body: formData
-                });
+        try {
+            const res = await fetch('/api/users/register', {
+                method: 'POST',
+                body: new FormData(e.target)
+            });
+            const text = await res.text();
 
-                const data = await response.text();
+            if (!res.ok) throw new Error(text);
 
-                if (response.ok) {
-                    resultDiv.className = 'success';
-                    resultDiv.innerText = data + '\n\nŞimdi S3\'ten güvenli link (Presigned URL) alınıyor...';
-                    resultDiv.style.display = 'block';
+            resultBox.className = 'result-box success';
+            resultBox.textContent = text;
+            resultBox.style.display = 'block';
 
-                    // Regex ile dönen metindeki ID'yi bul (Örn: "Kullanıcı ID: 1")
-                    const idMatch = data.match(/ID: (\d+)/);
-                    if (idMatch && idMatch[1]) {
-                        const userId = idMatch[1];
-                        
-                        // 2. Presigned URL'i çekme (GET)
-                        const urlResponse = await fetch(`/api/users/${userId}/profile-picture`);
-                        if (urlResponse.ok) {
-                            const presignedUrl = await urlResponse.text();
-                            profileImg.src = presignedUrl;
-                            imgContainer.style.display = 'block';
-                            resultDiv.innerText = "Kayıt başarılı! Resim S3'ten güvenli bir şekilde yüklendi.";
-                        }
-                    }
-                    e.target.reset();
-                } else {
-                    throw new Error(data);
+            const idMatch = text.match(/ID: (\d+)/);
+            if (idMatch) {
+                const urlRes = await fetch(`/api/users/${idMatch[1]}/profile-picture`);
+                if (urlRes.ok) {
+                    document.getElementById('profileImg').src = await urlRes.text();
+                    photoPreview.style.display = 'block';
                 }
-            } catch (error) {
-                resultDiv.className = 'error';
-                resultDiv.innerText = error.message;
-                resultDiv.style.display = 'block';
-            } finally {
-                btn.innerText = 'Kayıt Ol';
-                btn.style.opacity = '1';
-                btn.disabled = false;
             }
-        });
-    </script>
+
+            gotoUsers.style.display = 'block';
+            e.target.reset();
+        } catch (err) {
+            resultBox.className = 'result-box error';
+            resultBox.textContent = err.message;
+            resultBox.style.display = 'block';
+        } finally {
+            btn.textContent = 'Kayıt Ol';
+            btn.disabled = false;
+        }
+    });
+</script>
 </body>
 </html>
