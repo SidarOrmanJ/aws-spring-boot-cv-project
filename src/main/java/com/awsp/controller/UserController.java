@@ -129,4 +129,23 @@ public class UserController {
                 .contentLength(fileBytes.length)
                 .body(fileBytes);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        try {
+            UserEntity user = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + id));
+
+            // S3'ten resmi sil
+            if (user.getProfilePictureS3Key() != null) {
+                s3Service.deleteFile(user.getProfilePictureS3Key());
+            }
+
+            // Veritabanından sil
+            userRepository.delete(user);
+            return ResponseEntity.ok("Kullanıcı ve fotoğrafı başarıyla silindi.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Silme hatası: " + e.getMessage());
+        }
+    }
 }

@@ -249,6 +249,25 @@
             border-color: rgba(74,222,128,0.3);
         }
 
+        .btn-delete {
+            padding: 0.6rem 0.8rem;
+            background: rgba(239,68,68,0.1);
+            color: #f87171;
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+
         /* ── EMPTY STATE ── */
         .empty-state {
             text-align: center;
@@ -469,8 +488,9 @@
                         <div class="card-email">${user.email}</div>
                         <div class="card-id">ID: ${user.id} · RDS PostgreSQL</div>
                         <div class="card-actions">
-                            <button class="btn-view" onclick="openModal(${user.id})">🔍 Detay & Presigned URL</button>
+                            <button class="btn-view" onclick="openModal(${user.id})">🔍 Detay</button>
                             <a class="btn-download" href="/api/users/${user.id}/profile-picture/download" title="S3'ten İndir">⬇</a>
+                            <button class="btn-delete" onclick="deleteUser(${user.id})" title="Sil">🗑️</button>
                         </div>
                     </div>`;
                 grid.appendChild(card);
@@ -501,6 +521,24 @@
     function closeModal(e) {
         if (e.target.id === 'modalBackdrop') {
             document.getElementById('modalBackdrop').classList.remove('open');
+        }
+    }
+
+    async function deleteUser(id) {
+        if (!confirm('Bu kullanıcıyı (ve S3 üzerindeki fotoğrafını) silmek istediğinize emin misiniz?')) return;
+        
+        try {
+            const res = await fetch('/api/users/' + id, { method: 'DELETE' });
+            const text = await res.text();
+            
+            if (res.ok) {
+                addSqsLog(`Silme İşlemi — ID: ${id} RDS ve S3'ten silindi.`);
+                loadUsers(); // Listeyi yenile
+            } else {
+                alert('Silme başarısız: ' + text);
+            }
+        } catch (err) {
+            alert('Hata: ' + err.message);
         }
     }
 

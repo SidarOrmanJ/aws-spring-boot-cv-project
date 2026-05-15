@@ -64,4 +64,10 @@ public class S3Service {
     public byte[] downloadFile(String s3Key) throws IOException {
         return s3Template.download(bucketName, s3Key).getInputStream().readAllBytes();
     }
+
+    public void deleteFile(String s3Key) {
+        if (s3Key != null && !s3Key.isEmpty()) {
+            s3Template.deleteObject(bucketName, s3Key);
+        }
+    }
 }
