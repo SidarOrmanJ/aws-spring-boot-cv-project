@@ -33,7 +33,7 @@ public class SqsMessageConsumer {
             org.springframework.mail.SimpleMailMessage mailMessage = new org.springframework.mail.SimpleMailMessage();
             mailMessage.setTo(email);
             mailMessage.setSubject("AWS CV Projesine Hoşgeldiniz!");
-            mailMessage.setText("Merhaba " + fullName + ",\n\nAWS Spring Boot projesine başarıyla kayıt oldunuz.\nBu e-posta SQS kuyruğundan tetiklenerek asenkron olarak gönderilmiştir!\n\nSaygılarımızla,\nAWS CV Projesi");
+            mailMessage.setText("Merhaba " + fullName + ",\n\nAWS Spring Boot projesine başarıyla kayıt oldunuz.\nBu e-posta SQS kuyruğundan tetiklenerek asenkron olarak gönderilmiştir!\n");
 
             mailSender.send(mailMessage);
             
