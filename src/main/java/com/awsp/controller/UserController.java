@@ -4,11 +4,15 @@ import com.awsp.entity.UserEntity;
 import com.awsp.repository.UserRepository;
 import com.awsp.service.S3Service;
 import com.awsp.service.SqsMessageProducer;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -70,5 +74,39 @@ public class UserController {
 
         // Linki metin olarak geri dön
         return ResponseEntity.ok(presignedUrl);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Map<String, Object>>> listUsers() {
+        List<UserEntity> users = userRepository.findAll();
+        List<Map<String, Object>> result = users.stream().map(u -> {
+            String presignedUrl = u.getProfilePictureS3Key() != null
+                    ? s3Service.getPresignedUrl(u.getProfilePictureS3Key()) : null;
+            return Map.<String, Object>of(
+                    "id", u.getId(),
+                    "fullName", u.getFullName(),
+                    "email", u.getEmail(),
+                    "profilePictureUrl", presignedUrl != null ? presignedUrl : ""
+            );
+        }).toList();
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{id}/profile-picture/download")
+    public ResponseEntity<byte[]> downloadProfilePicture(@PathVariable Long id) throws IOException {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + id));
+
+        if (user.getProfilePictureS3Key() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        byte[] fileBytes = s3Service.downloadFile(user.getProfilePictureS3Key());
+        String filename = user.getFullName().replace(" ", "_") + "_" + user.getProfilePictureS3Key();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(fileBytes);
     }
 }

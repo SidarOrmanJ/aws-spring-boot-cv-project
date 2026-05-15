@@ -16,3 +16,6 @@ target/
 
 # KRITIK: AWS kimlik bilgilerini ve şifreyi asla versiyona ekleme!
 src/main/resources/application.properties
+
+# Proje içi geçici dosyalar
+cp.txt

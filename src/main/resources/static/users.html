@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS CV Projesi - Kullanıcı Paneli</title>
+    <style>
+        :root {
+            --primary: #8a2be2;
+            --accent: #ec4899;
+            --bg: #0f172a;
+            --surface: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --success: #4ade80;
+            --warning: #facc15;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: linear-gradient(135deg, var(--bg) 0%, #1e1b4b 100%);
+            min-height: 100vh;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+        }
+
+        /* ── NAV ── */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(to right, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links { display: flex; gap: 0.5rem; }
+
+        .nav-btn {
+            padding: 0.5rem 1.2rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--surface);
+            color: var(--text);
+            border-color: #a855f7;
+        }
+
+        /* ── BADGES / STATUS BAR ── */
+        .status-bar {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+
+        .badge-green  { background: rgba(74,222,128,0.1);  color: var(--success); border-color: rgba(74,222,128,0.3); }
+        .badge-purple { background: rgba(168,85,247,0.1);  color: #c084fc;        border-color: rgba(168,85,247,0.3); }
+        .badge-pink   { background: rgba(236,72,153,0.1);  color: #f472b6;        border-color: rgba(236,72,153,0.3); }
+        .badge-yellow { background: rgba(250,204,21,0.1);  color: var(--warning); border-color: rgba(250,204,21,0.3); }
+
+        .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+        /* ── MAIN ── */
+        main { padding: 0 2rem 4rem; }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .section-title span {
+            background: linear-gradient(to right, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ── USER GRID ── */
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .user-card {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(12px); } }
+
+        .user-card:hover {
+            transform: translateY(-6px);
+            border-color: #a855f7;
+            box-shadow: 0 20px 40px rgba(138,43,226,0.2);
+        }
+
+        .card-photo-wrapper {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e1b4b, #2e1065);
+        }
+
+        .card-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .user-card:hover .card-photo { transform: scale(1.05); }
+
+        .card-photo-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        .s3-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(138,43,226,0.85);
+            backdrop-filter: blur(8px);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .card-body {
+            padding: 1.2rem;
+        }
+
+        .card-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .card-email {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-id {
+            font-size: 0.7rem;
+            color: #6366f1;
+            font-family: monospace;
+            background: rgba(99,102,241,0.1);
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-view {
+            flex: 1;
+            padding: 0.6rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-view:hover { opacity: 0.85; }
+
+        .btn-download {
+            padding: 0.6rem 0.8rem;
+            background: rgba(255,255,255,0.05);
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-download:hover {
+            background: rgba(74,222,128,0.1);
+            color: var(--success);
+            border-color: rgba(74,222,128,0.3);
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--muted);
+        }
+
+        .empty-state .icon { font-size: 4rem; margin-bottom: 1rem; }
+        .empty-state p { margin-bottom: 1.5rem; }
+        .empty-state a {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        /* ── MODAL ── */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-backdrop.open { display: flex; }
+
+        .modal {
+            background: #1e1b4b;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 420px;
+            width: 90%;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .modal img {
+            width: 100%;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            border: 2px solid #a855f7;
+        }
+
+        .modal-name { font-weight: 700; font-size: 1.3rem; margin-bottom: 0.3rem; }
+        .modal-email { color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; }
+        .modal-url { font-size: 0.65rem; color: #6366f1; word-break: break-all; background: rgba(99,102,241,0.1); padding: 0.5rem; border-radius: 8px; margin-bottom: 1rem; font-family: monospace; }
+        .modal-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 0.2rem; }
+
+        .modal-actions { display: flex; gap: 0.5rem; }
+
+        .btn-modal-close {
+            flex: 1;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.05);
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-modal-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+        .btn-modal-download {
+            flex: 1;
+            padding: 0.75rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: opacity 0.2s;
+        }
+
+        .btn-modal-download:hover { opacity: 0.85; }
+
+        /* ── LOADING ── */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--muted);
+        }
+
+        .spinner {
+            width: 48px; height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: #a855f7;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── SQS LOG ── */
+        .log-section { margin-top: 3rem; }
+        .log-box {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.2rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .log-entry { padding: 0.3rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--muted); }
+        .log-entry .time { color: #6366f1; margin-right: 0.5rem; }
+        .log-entry .msg { color: var(--success); }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-brand">☁️ AWS CV Project</div>
+    <div class="nav-links">
+        <a href="/" class="nav-btn">+ Yeni Kayıt</a>
+        <a href="/users.html" class="nav-btn active">👥 Kullanıcılar</a>
+    </div>
+</nav>
+
+<div class="status-bar">
+    <div class="badge badge-green"><div class="dot"></div> EC2 Çalışıyor</div>
+    <div class="badge badge-purple"><div class="dot"></div> S3 (Private Bucket)</div>
+    <div class="badge badge-pink"><div class="dot"></div> SQS Kuyruğu Aktif</div>
+    <div class="badge badge-yellow"><div class="dot"></div> RDS PostgreSQL</div>
+</div>
+
+<main>
+    <div id="userCount" style="color: var(--muted); font-size: 0.875rem; margin-bottom: 1rem;"></div>
+    <h2 class="section-title">Kayıtlı Kullanıcılar <span>— AWS RDS'den</span></h2>
+
+    <div id="content">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>AWS RDS'den kullanıcılar yükleniyor...</p>
+        </div>
+    </div>
+
+    <div class="log-section">
+        <h2 class="section-title" style="font-size: 1rem; margin-bottom: 0.75rem;">📨 SQS Asenkron İşlem Logu <span>— Gönderilen Görevler</span></h2>
+        <div class="log-box" id="sqsLog">
+            <div class="log-entry"><span class="time">[SQS]</span> <span class="msg">Kuyruk dinleyici başlatıldı — user-registration-queue</span></div>
+        </div>
+    </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+        <img id="modalImg" src="" alt="Profil Resmi">
+        <p class="modal-label">AD SOYAD</p>
+        <p class="modal-name" id="modalName"></p>
+        <p class="modal-label" style="margin-top:0.5rem">E-POSTA</p>
+        <p class="modal-email" id="modalEmail"></p>
+        <p class="modal-label">S3 PRESIGNED URL (5 dk geçerli)</p>
+        <p class="modal-url" id="modalUrl"></p>
+        <div class="modal-actions">
+            <button class="btn-modal-close" onclick="document.getElementById('modalBackdrop').classList.remove('open')">Kapat</button>
+            <a class="btn-modal-download" id="modalDownload" href="#">⬇ İndir (S3)</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let users = [];
+
+    async function loadUsers() {
+        try {
+            const res = await fetch('/api/users');
+            users = await res.json();
+
+            const countEl = document.getElementById('userCount');
+            countEl.textContent = `Toplam ${users.length} kullanıcı listeleniyor.`;
+
+            if (users.length === 0) {
+                document.getElementById('content').innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">👤</div>
+                        <p>Henüz kayıtlı kullanıcı yok.</p>
+                        <a href="/">İlk Kaydı Oluştur</a>
+                    </div>`;
+                return;
+            }
+
+            const grid = document.createElement('div');
+            grid.className = 'user-grid';
+
+            users.forEach((user, i) => {
+                const card = document.createElement('div');
+                card.className = 'user-card';
+                card.style.animationDelay = `${i * 0.08}s`;
+                card.innerHTML = `
+                    <div class="card-photo-wrapper">
+                        ${user.profilePictureUrl
+                            ? `<img class="card-photo" src="${user.profilePictureUrl}" alt="${user.fullName}" onerror="this.style.display='none'">`
+                            : `<div class="card-photo-placeholder">👤</div>`
+                        }
+                        <span class="s3-badge">🔒 S3 Presigned</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-name">${user.fullName}</div>
+                        <div class="card-email">${user.email}</div>
+                        <div class="card-id">ID: ${user.id} · RDS PostgreSQL</div>
+                        <div class="card-actions">
+                            <button class="btn-view" onclick="openModal(${user.id})">🔍 Detay & Presigned URL</button>
+                            <a class="btn-download" href="/api/users/${user.id}/profile-picture/download" title="S3'ten İndir">⬇</a>
+                        </div>
+                    </div>`;
+                grid.appendChild(card);
+            });
+
+            document.getElementById('content').innerHTML = '';
+            document.getElementById('content').appendChild(grid);
+
+        } catch (err) {
+            document.getElementById('content').innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>Yükleme hatası: ${err.message}</p></div>`;
+        }
+    }
+
+    function openModal(userId) {
+        const user = users.find(u => u.id === userId);
+        if (!user) return;
+        document.getElementById('modalImg').src = user.profilePictureUrl || '';
+        document.getElementById('modalName').textContent = user.fullName;
+        document.getElementById('modalEmail').textContent = user.email;
+        document.getElementById('modalUrl').textContent = user.profilePictureUrl || 'Fotoğraf yok';
+        document.getElementById('modalDownload').href = `/api/users/${user.id}/profile-picture/download`;
+        document.getElementById('modalBackdrop').classList.add('open');
+
+        // SQS log simülasyonu
+        addSqsLog(`Presigned URL üretildi — Kullanıcı ID: ${userId} | Geçerlilik: 5 dakika`);
+    }
+
+    function closeModal(e) {
+        if (e.target.id === 'modalBackdrop') {
+            document.getElementById('modalBackdrop').classList.remove('open');
+        }
+    }
+
+    function addSqsLog(msg) {
+        const log = document.getElementById('sqsLog');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        const now = new Date().toLocaleTimeString('tr-TR');
+        entry.innerHTML = `<span class="time">[${now}]</span> <span class="msg">${msg}</span>`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    // İlk yükleme
+    loadUsers();
+
+    // SQS canlılık simülasyonu
+    setTimeout(() => addSqsLog('SQS → user-registration-queue bağlantısı doğrulandı'), 1500);
+</script>
+</body>
+</html>

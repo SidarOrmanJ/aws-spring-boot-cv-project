@@ -60,4 +60,8 @@ public class S3Service {
 
         return presignedGetObjectRequest.url().toString();
     }
+
+    public byte[] downloadFile(String s3Key) throws IOException {
+        return s3Template.download(bucketName, s3Key).getContentAsByteArray();
+    }
 }
