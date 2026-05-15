@@ -101,12 +101,30 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
 
-        byte[] fileBytes = s3Service.downloadFile(user.getProfilePictureS3Key());
-        String filename = user.getFullName().replace(" ", "_") + "_" + user.getProfilePictureS3Key();
+        String s3Key = user.getProfilePictureS3Key();
+
+        // Uzantıyı s3Key'den al ("uuid.jpg" -> ".jpg")
+        String extension = s3Key.contains(".") ? s3Key.substring(s3Key.lastIndexOf(".")).toLowerCase() : "";
+
+        // Temiz bir dosya adı üret (UUID olmadan)
+        String cleanName = user.getFullName().replaceAll("[^a-zA-Z0-9çÇğğıİöÖşŞüÜ]", "_");
+        String filename = cleanName + "_profil" + extension;
+
+        // Uzantıya göre doğru Content-Type belirle
+        MediaType mediaType = switch (extension) {
+            case ".jpg", ".jpeg" -> MediaType.IMAGE_JPEG;
+            case ".png"          -> MediaType.IMAGE_PNG;
+            case ".gif"          -> MediaType.IMAGE_GIF;
+            case ".webp"         -> MediaType.parseMediaType("image/webp");
+            default              -> MediaType.APPLICATION_OCTET_STREAM;
+        };
+
+        byte[] fileBytes = s3Service.downloadFile(s3Key);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentType(mediaType)
+                .contentLength(fileBytes.length)
                 .body(fileBytes);
     }
 }

@@ -62,6 +62,6 @@ public class S3Service {
     }
 
     public byte[] downloadFile(String s3Key) throws IOException {
-        return s3Template.download(bucketName, s3Key).getContentAsByteArray();
+        return s3Template.download(bucketName, s3Key).getInputStream().readAllBytes();
     }
 }
