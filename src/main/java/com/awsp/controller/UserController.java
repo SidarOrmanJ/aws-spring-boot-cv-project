@@ -53,6 +53,8 @@ public class UserController {
 
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body("Hata [S3 Dosya Yükleme]: " + e.getMessage());
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest().body("Hata: Bu e-posta adresi zaten kullanımda!");
         } catch (Exception e) {
             // SQS, DB gibi diğer servis hatalarını da yakala
             return ResponseEntity.internalServerError().body("Hata [Genel]: " + e.getMessage());
