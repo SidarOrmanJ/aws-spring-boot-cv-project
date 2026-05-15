@@ -1,0 +1,20 @@
+# AWS Kimlik bilgileri ve şifre — bu dosyayı ASLA git'e yükleme!
+# Bunun yerine application.properties.example dosyasını versiyona ekleyin.
+spring.application.name=awsp
+
+# AWS Credentials
+spring.cloud.aws.credentials.access-key=YOUR_ACCESS_KEY_HERE
+spring.cloud.aws.credentials.secret-key=YOUR_SECRET_KEY_HERE
+spring.cloud.aws.region.static=eu-central-1
+
+# S3 Configuration
+app.s3.bucket=YOUR_BUCKET_NAME_HERE
+
+# SQS Configuration
+app.sqs.queue.registration=user-registration-queue
+
+# Database Configuration
+spring.datasource.url=jdbc:postgresql://YOUR_RDS_ENDPOINT:5432/postgres
+spring.datasource.username=postgres
+spring.datasource.password=YOUR_DB_PASSWORD_HERE
+spring.jpa.hibernate.ddl-auto=update
